@@ -17,7 +17,7 @@ sidebar = html.Div([
                 dbc.NavLink(
                     [html.I(className="fas fa-home me-2"),
                      html.Span("Overview")],
-                    href="apps/overview",
+                    href="/overview",
                     active="exact",
                 ),
                 dbc.NavLink(
@@ -25,7 +25,15 @@ sidebar = html.Div([
                         html.I(className="fas fa-calendar-alt me-2"),
                         html.Span("Schedule"),
                     ],
-                    href="apps/schedule",
+                    href="/schedule",
+                    active="exact",
+                ),
+                dbc.NavLink(
+                    [
+                        html.I(className="fas fa-database me-2"),
+                        html.Span("Data Processing"),
+                    ],
+                    href="/data_processing",
                     active="exact",
                 ),
 
@@ -66,13 +74,14 @@ jumbotron = html.Div(
 
 content_style = {
     "margin-top": "0rem",
+    'margin-left': "4rem",
     "padding": "2rem 1rem",
     }
 content = html.Div(id="page-content", style=content_style)
 app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
 
 
-from apps import overview, schedule
+from apps import overview, schedule, data_processing
 
 
 #create a callback to display the pages
@@ -81,10 +90,12 @@ from apps import overview, schedule
 
 def render_page_content(pathname):
 
-    if pathname == "/apps/overview":
+    if pathname == "/overview":
         return overview.layout
-    elif pathname == "/apps/schedule":
+    elif pathname == "/schedule":
         return schedule.layout
+    elif pathname == "/data_processing":
+        return data_processing.layout
     # If the user tries to reach a different page, return a 404 message
     else:
         return jumbotron
