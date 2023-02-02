@@ -100,6 +100,24 @@ def render_page_content(pathname):
     else:
         return jumbotron
 
+@app.callback(
+    Output('interview-data','data'),
+    Input('interview-data', 'data')
+
+)
+def parse_contents(contents, filename, date):
+    print(contents)
+    print(filename)
+    print(date)
+    # import base64
+    # import datetime
+    # import io
+    #
+    # content_type, content_string = contents.split(',')
+    # decoded = base64.b64decode(content_string)
+
+
+
 if __name__ == "__main__":
     app.run_server(debug=True)
 

@@ -6,8 +6,10 @@ layout = html.Div([
 
     dcc.Upload([
         'Drag and Drop or ',
-        html.A('Click to Select a File')
-    ], style={
+        html.A('Click to Select a File'),
+
+    ],  id='interview-data',
+        style={
         'width': 'auto',
         'height': 'auto',
         'lineHeight': '60px',
@@ -19,3 +21,7 @@ layout = html.Div([
         'margin-right':'6rem'
     })
 ])
+
+
+
+
