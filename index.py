@@ -100,21 +100,18 @@ def render_page_content(pathname):
     else:
         return jumbotron
 
-@app.callback(
-    Output('interview-data','data'),
-    Input('interview-data', 'data')
+@app.callback(Output('output-data-upload', 'children'),
+              Input('upload-data', 'contents'),
+              State('upload-data', 'filename'),
+              State('upload-data', 'last_modified'))
 
-)
-def parse_contents(contents, filename, date):
-    print(contents)
-    print(filename)
-    print(date)
-    # import base64
-    # import datetime
-    # import io
-    #
-    # content_type, content_string = contents.split(',')
-    # decoded = base64.b64decode(content_string)
+def update_output(list_of_contents, list_of_names, list_of_dates):
+    from apps.data_processing import parse_contents
+    if list_of_contents is not None:
+        children = [
+            parse_contents(c, n, d) for c, n, d in
+            zip(list_of_contents, list_of_names, list_of_dates)]
+        return children
 
 
 
