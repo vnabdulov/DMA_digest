@@ -4,6 +4,67 @@ import io
 
 from dash import dcc, html, dash_table
 
+
+def convert_interview_df(df):
+    import pandas as pd
+    # takes the interview df and breaks out start and end time and
+    # consolidated the speaker text
+    interview_text = []
+    df_matter = []
+    df['start_time'] = df.time.apply(lambda x: x.split('-->')[0])
+    df['end_time'] = df.time.apply(lambda x: x.split('-->')[1])
+    df['speaker'] = df['speaker'].apply(lambda x: x[:-19])
+
+    for index, row in df.iterrows():
+        set_speaker = row['speaker']
+
+        if index == 0:
+            cur_speaker = row['speaker']
+            start_time = row['start_time']
+
+        if set_speaker == cur_speaker:
+            interview_text.append(row['text'])
+            end_time = row['end_time']
+            if index == df.size:
+                df_matter.append([cur_speaker, ''.join(interview_text), start_time, end_time])
+        else:
+            df_matter.append([cur_speaker, ''.join(interview_text), start_time, end_time])
+            start_time = row['start_time']
+            cur_speaker = row['speaker']
+            interview_text = [row['text']]
+            end_time = row['end_time']
+
+    converted_df = pd.DataFrame(df_matter)
+    converted_df.columns = ['speaker', 'text', 'start_time', 'end_time']
+
+    return converted_df
+
+
+def get_time_per_speaker(df):
+    import pandas as pd
+
+    df['start_time'] = df['start_time'].str.strip()
+    df['start_time'] = pd.to_datetime(df['start_time'], format='%H:%M:%S.%f')
+
+    df['end_time'] = df['end_time'].str.strip()
+    df['end_time'] = pd.to_datetime(df['end_time'], format='%H:%M:%S.%f')
+    # Create a column for the duration of each speech
+    df['duration'] = df['end_time'] - df['start_time']
+
+    # Convert the duration column to seconds
+    df['duration'] = df['duration'].dt.total_seconds()
+
+    # Group the data by speaker and sum the duration for each speaker
+    speaker_durations = df.groupby('speaker')['duration'].sum().reset_index()
+
+    # Convert the start_time and end_time columns back to strings
+    df['start_time'] = df['start_time'].dt.strftime("%H:%M:%S.%f")
+    df['end_time'] = df['end_time'].dt.strftime("%H:%M:%S.%f")
+
+    return speaker_durations, df
+
+
+
 layout = html.Div([
     dcc.Upload(
         id='upload-data',
@@ -70,10 +131,54 @@ def parse_contents(contents, filename, date):
         return html.Div([
             'There was an error processing this file.'
         ])
+    import plotly.express as px
+
+    c_df = convert_interview_df(df)
+    speaker_durations, prompt_duration_df = get_time_per_speaker(c_df)
+    speaker_colors = {}
+    speakers = df.speaker.unique()
+    colors = [x for x in px.colors.qualitative.T10]
+    for x in range(len(speakers)):
+        speaker_colors[speakers[x]] = colors[x]
+
+    # Plot the bar graph
+    fig_speaker_durations = px.bar(speaker_durations,
+                                   x='duration',
+                                   y='speaker',
+                                   color='speaker',
+                                   color_discrete_map=speaker_colors)
+
+    # Remove the background
+    fig_speaker_durations.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',  # transparent
+        plot_bgcolor='rgba(0,0,0,0)',
+        legend=dict(title="Speaker"),
+        xaxis_title=None,
+        yaxis_title=None
+
+    )
+    fig_speaker_durations.update_xaxes(showticklabels=False)
+
+    fig_prompt_duration = px.bar(prompt_duration_df.reset_index(),
+                                 x='index',
+                                 y='duration',
+                                 color='speaker',
+                 color_discrete_map=speaker_colors)
+    # Remove the background
+    fig_prompt_duration.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',  # transparent
+        plot_bgcolor='rgba(0,0,0,0)',
+        legend=dict(title="Speaker"),
+        xaxis_title=None,
+        yaxis_title=None
+    )
+
 
     return html.Div([
         html.H5(filename),
         html.H6(datetime.datetime.fromtimestamp(date)),
+        dcc.Graph(figure=fig_speaker_durations),
+        dcc.Graph(figure=fig_prompt_duration),
 
         dash_table.DataTable(
             df.to_dict('records'),
