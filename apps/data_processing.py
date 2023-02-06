@@ -137,20 +137,7 @@ def generate_issues(chunks):
         issues.append(api.send_message(question + c)['message'])
     return ''.join(issues)
 
-def get_issues_dict(gpt_answer):
-    lines = gpt_answer.split('\n')
 
-    result = {}
-    current_domain = None
-    for line in lines:
-        if 'Domain:' in line:
-            current_domain = line.split(':')[0].strip()
-            result[current_domain] = []
-        elif current_domain and line.startswith('*'):
-            result[current_domain].append(line[2:].strip())
-        elif 'Note:' in line:
-            break
-    return result
 
 
 
