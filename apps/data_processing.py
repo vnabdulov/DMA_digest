@@ -1,16 +1,25 @@
 import base64
 import datetime
 import io
-import spacy
-import en_core_web_lg
-nlp = spacy.load("en_core_web_lg")
+# import spacy
+# import en_core_web_lg
 
 from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 
 
+def sub_terms(interview_string):
+    interview_string = interview_string.replace('Umm,','').replace('you know','').replace('Yeah.','').replace('Umm','').replace('Yeah,','').replace('Uh,',' ').replace('uh','').replace('Uh.','')
+    interview_string = interview_string.replace('So yeah','').replace('Mm-hmm','').replace('OK','').replace('soften', 'SOFM').replace('Advanta','Advana').replace('Absolute you sock', 'USASOC').replace('you sock','USASOC')
+    interview_string = interview_string.replace('advanta','Advana').replace('sofam','SOFM').replace('soft 18','SOF AT&L').replace('socom','SOCOM').replace('soft ATL', 'SOF AT&L').replace('So.','')
+    interview_string = interview_string.replace('SOFM','Special Operations Financial Management').replace('army','Army').replace('Defassa','DFAS').replace('USO COM','USSOCOM').replace('banana','Advana')
+    interview_string = interview_string.replace('SOF', 'Special Operations Forces').replace('services','Services').replace('ADVANTA','Advana').replace('.Uh','').replace('Evanna','Advana').replace('Vanna','Advana')
+    interview_string = interview_string.replace('SOCOM', 'Special Operations Command').replace('OSD','Office of the Secretary of Defense').replace('G socks',"TSOCs")
+    return interview_string
+
 def convert_interview_df(df):
     import pandas as pd
+    df['text']=df['text'].apply(lambda x: sub_terms(x))
     # takes the interview df and breaks out start and end time and
     # consolidated the speaker text
     interview_text = []
@@ -43,7 +52,6 @@ def convert_interview_df(df):
 
     return converted_df
 
-
 def get_time_per_speaker(df):
     import pandas as pd
 
@@ -67,9 +75,76 @@ def get_time_per_speaker(df):
 
     return speaker_durations, df
 
-def get_top_ten_ents(df):
-    import spacy
-    nlp = spacy.load("en_core_web_sm")
+def get_gpt_api():
+    from pyChatGPT import ChatGPT
+    session_token = 'eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..q46uzUDwBWXO9UZe.LvyZX9xw-XE4lgMBJCaGrLK_RWXKTVyQ37xm7Tm-sXcofPzaroaEinswo1LjqbW_Znh8YBWxys0W4Tx_6cIwOEyaKK0MxnWN1pkSfl1QsFNK8wLKaP7RWK5l1a4MR7qKApN5qQKOAurGuSJmKTUitDz0LBy4oJFN8hl7oCIhgRT7xBhc7LdMXLXKjyCngPporG4HUML175C1V2gONwVoei47zj9QiUFvX-LSAGUWE-mCWpiRo0AOPMkPb7DKH6JaQMGZ7kr5gS0wHbpR2o3CtduRpylx-SkeU8zsqLzFqkPnqIt1zRTFKEo0pwdnQMPSwt2s8sp-tA5IKUY7lF3NNe8hXSvJh6-0IpkCJUZx9mgl_aufeLEUZ-WIJbiiAeCF28GaVbAQFI4Yz08DLPHlVYSoG_8W5Mha9BS8dQ6ZAGXRAGIzK2j_kQIjdoIvCyaPqoTEsp5S9fi8yf2tYRkZPgT2DTEJ5dMy2xbKFaYszq--RHCntjCnrc319oSH3PDqBj6-UA10bt_xws5pc2-wmv0jYP-kCxzj8CYNPVKbOO-XI5rTFDrgirHt-M8bZq06sMeAYZ8b0IjDuCw4TPKksRxxzjsO76YO_hOpdN3d0N5qFYjJB4xgrouPYDM0uec-SlHs9DCUZOI0V1p4H_dnHqvZIf_WQ3QwEpjT6zn7XuEe0SFX87PJg0PVTsoQ4NHLJY2tB9EsK1DF9ZnoBKto-M4s9fSZfYt0zW0HRAGCEhExveGnRuZksS7bxgX3vRLC0BjZAM4LLaRcKn8tq-ZAo9Y3kW_PDi9pk0BtW1GIImhXPLYGgol_VY7P_LeSukoraksTrkkDXBdPWLwLVvdVOCeSnXidy3VTKvECM4ENf7wmfVbk2hIonfcxco8pMWcQcCSFNB8sBY8lbAyIjaaIC4M0Sae8vOthEPJC5cVO-ykvDWmkoSkvihpCeH5TKTRnMUFqld4S6tHyCdSA9MHS8-MHimFWNZ9sgD5kjIu-7JNuueFcuUxhwCnrv1OnfjwWgnJqvzXlcqgMaFovgrBPyi7XM0H84G70Av0N_yQp1DABBjPkT4Gu7fL--XATXuoUro1uwzQjcTOGowQit1RvZGoJFupPf_e6zQphDBq3TQpQfECXzDEAAJIqzQXwAUwqMD_YqptjxUIpHg5bXfNs1AFSIBAwn1UHWKg3rkJOQhjJZpcb5bN-RgUpefUAqFEcZQc_dkMqZX3QEKpN1OW914sUiA0XTMJTO0jS2FZH6DZr995IbdYXvapiDpy4m6TX0HJrzH_XA3PelkPiT-1Q5tH8aPUaaJjAoiXAf0HkadCkX7MwFfMWm9E9Da6w6YZJXRCXIfSs93C9vArjuuA_uhRJ7CwDgX8XQ1IuCURP1O4l5fCLB5B08uzwydTlahCXKxkKHKAN3x6Q8ApK_Ufq5VIQ5O727FxDMUHF-lJgOL6wVNCHfFvM2259Qd3FshkxUx_ZwAQgkNMbKmDHoxsHVQYsGzLihvXhimmSSTgHRoGKNbzkhsMUlEjwqZd12tIjANBL_VV7dTk3nAfpJCJ-2SvVvRilVvPO9eLCBBMVNqRn3rstK-fVa-Q8K12_xEKsCKA0T3cCTKZbvMTsCakPrNK3dgo4mGVEjogiPf79G626FHdMEc7zAhjzRsqeZoIO1KQUIWiscWkRl5c_-wyLx6fniu3l-ntwR-h3c1tcmhygkNf8nnPYd75n4_a9DbP4lkCNDhx6wBdr6P7zB0O1NYkcsUre-LinfaFyKfeu-Nnm5vD6rHtNPcigwG9Mog0me1Zc4NySO2T2Qfb1IunTg2WocWW9xhrgrdDU5kNtbb-FgvaLx-VagFMxz0y5nZbYhdz_tOgulWetbGrqSTkyfRMdWU7RSxD3nG9ooBvpLpGe4vtRz3Gt-4V-BHczl9PTtQuT7ZmjKdzC3trLTUUzE5h7hpsvKk_A5jIUdKfC3Nh5si_4iMqfX18a878bW0BI-jz0A_tKSKLSgPMoCxxhC7c1aDvGE2YGqLNoe-JAED9PKQyJeLNjCMWYfR8ggF6ML_AAgXhO286dTn6w8vXTUE4An2wdOO6a5TUiXBUuo_jZ-h2HMFuXP0naASQdeMkCKOJheDDZwW9FZwnGq7k5wCAtqX0kEHp9I797q7ND3HdAmpi2kQtXIHiW6b4kpm0knSbJvODw-8ZooKA1cwC4OGGVcVIktjqHOF0oiQOBm7aNUlhvZdqQ9oezaw96Y3kU2Z2FjnaaTbTeuuKCvVmzLYqIWK984SSzDg7tlezzq0AWjVGqnzSoUD-8jXZRpTuvKpcNMuPxKLEKpZ45HrA268i78qjITrq9zSJ7EIKaOk3RjlRxSjv6t8XhdpWFE-1ohwk_UhzgeRSrslRzunQqySJAl6YprcpItf_n8PN7NEPKNhlRUQ0OvelxUYZNYxkvhCbwSLH51yFGqRm7MmSDYmhtGgwCJvE1W1VhpLwZlobhPCE_mU9sI8sX73sot9e18W-58mevMdrSj4stN1jPLhQfQF818zpE.-xxAAQMTPl5Jl3oJUJ9pfw'
+    api = ChatGPT(session_token)
+    return api
+
+def generate_chunks(df):
+    df = process_df(df)
+    full_text = ''.join(x for x in df.drop_duplicates(subset=['interview_text']).interview_text)
+    chunks =[]
+    start = 0
+    end = 2200
+    final_end = len(full_text.split())
+    for x in range(final_end//2000+1):
+        try:
+            chunks.append(' '.join(x for x in full_text.split()[start:end]))
+            start +=2200
+            end+=2200
+        except:
+            chunks.append(' '.join(x for x in full_text.split()[end:final_end]))
+    print(len(chunks), ' chunks to analyze')
+    return chunks
+
+def remove_repeated_punct(string):
+    from itertools import groupby
+    from string import punctuation
+
+    newtext = []
+    for k, g in groupby(string):
+        if k in set(punctuation):
+            newtext.append(k)
+        else:
+            newtext.extend(g)
+
+    return ''.join(newtext)
+
+def generate_issues(chunks):
+    question = '''
+                Based on the following data maturity domains:
+                Culture and Leadership Domain
+                Looks at indicators related to organizational DNA, and the degree to which leadership is a sponsor and champion of becoming more “data-driven.”
+                Strategy and Approach Domain
+                Includes indicators of the organization's capabilities related to  project funding, business case development, planning and communication, and the involvement of customers and partners in setting direction.
+                People Domain
+                Looks at how well established various key data & analytics roles are, and whether they are staffed and organized optimally, and how well they interoperate. 
+                Technology Domain
+                Considers the organization’s overall data and analytics infrastructure capabilities, capacity, availability, performance, resilience, and scalability. 
+                Data Governance Domain
+                Assesses how well the organization defines principles and policies, and executes processes for ensuring the proper definition, handling, and use of enterprise data assets. 
+                Deployment and Usage Domain
+                Considers how well the organization takes advantage of available data assets and analytic output.
+                Architecture & Integration Domain
+                Looks at how well data flows and models support the organization’s analytics needs, and how flexible and scalable they are.
+
+                What issues are the interviewees expressing in the following text ? (in a bulletpoint format by domain) : 
+                '''
+
+    issues = []
+    for c in chunks:
+        issues.append(api.send_message(question + c)['message'])
+    return ''.join(issues)
+
+
+
+
+
+# def get_top_ten_ents(df):
+#     import spacy
+#     nlp = spacy.load("en_core_web_lg")
+#     entities =
 
 
 layout = html.Div([
