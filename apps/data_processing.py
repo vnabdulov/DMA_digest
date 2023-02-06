@@ -1,8 +1,12 @@
 import base64
 import datetime
 import io
+import spacy
+import en_core_web_lg
+nlp = spacy.load("en_core_web_lg")
 
 from dash import dcc, html, dash_table
+import dash_bootstrap_components as dbc
 
 
 def convert_interview_df(df):
@@ -63,6 +67,9 @@ def get_time_per_speaker(df):
 
     return speaker_durations, df
 
+def get_top_ten_ents(df):
+    import spacy
+    nlp = spacy.load("en_core_web_sm")
 
 
 layout = html.Div([
@@ -85,6 +92,7 @@ layout = html.Div([
         # Allow multiple files to be uploaded
         multiple=True
     ),
+
     html.Div(id='output-data-upload'),
 ])
 
@@ -172,25 +180,55 @@ def parse_contents(contents, filename, date):
         xaxis_title=None,
         yaxis_title=None
     )
+    fig_prompt_duration.update_xaxes(showticklabels=False)
+    fig_prompt_duration.update_yaxes(showticklabels=False)
 
 
     return html.Div([
-        html.H5(filename),
+        html.H6(f'Filename: {filename}'),
         html.H6(datetime.datetime.fromtimestamp(date)),
-        dcc.Graph(figure=fig_speaker_durations),
-        dcc.Graph(figure=fig_prompt_duration),
+        dbc.Card([
+            dbc.CardHeader('Interview Participation', style={'font-weight':'bold','text-align':'left'}),
+            dcc.Graph(figure=fig_speaker_durations),
 
+        ],className="text-center",
+            style={
+                'margin-top': '10px',
+                'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
+                              'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
+        ),
+        dbc.Card([
+            dbc.CardHeader('Interview Flow', style={'font-weight':'bold','text-align':'left'}),
+            dcc.Graph(figure=fig_prompt_duration),
+
+        ],className="text-center",
+        style={
+            'margin-top':'10px',
+            'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
+                         'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
+        ),
+        dbc.Card([
         dash_table.DataTable(
-            df.to_dict('records'),
-            [{'name': i, 'id': i} for i in df.columns]
+            c_df.to_dict('records'),
+            [{'name': i, 'id': i} for i in df.columns],
+            style_cell_conditional=[
+                {
+                    'if': {'column_id': 'text'},
+                    'textAlign': 'left'
+                }],
+            style_data = {
+                'whiteSpace':'normal',
+                'height':'auto'
+            },
+
+        ),],
+            style={
+            'margin-top':'10px',
+            'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
+                         'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
         ),
 
         html.Hr(),  # horizontal line
 
-        # For debugging, display the raw contents provided by the web browser
-        html.Div('Raw Content'),
-        html.Pre(contents[0:200] + '...', style={
-            'whiteSpace': 'pre-wrap',
-            'wordBreak': 'break-all'
-        })
+
     ])

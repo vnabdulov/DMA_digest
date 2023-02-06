@@ -74,7 +74,7 @@ jumbotron = html.Div(
 
 content_style = {
     "margin-top": "0rem",
-    'margin-left': "4rem",
+    'margin-left': "6rem",
     "padding": "2rem 1rem",
     }
 content = html.Div(id="page-content", style=content_style)
