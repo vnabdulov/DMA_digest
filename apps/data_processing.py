@@ -340,12 +340,12 @@ def parse_contents(contents, filename, date):
 
 ###############################################################
     return html.Div([
-        html.Div(create_dom_cards(),
+        dbc.Row(create_dom_cards(),
                  style={
                      'margin-top':'10px',
-                     'display': 'inline-block'
-                 },  ),
-        html.H6(f'Filename: {filename}',  style={'margin-top':'20px'}),
+
+                 }),
+        dbc.Row([html.H6(f'Filename: {filename}')],  style={'margin-top':'30px'}),
         html.H6(datetime.datetime.fromtimestamp(date)),
         # dbc.Row([
         #     dcc.Graph(figure=fig_bothplots),
@@ -377,7 +377,7 @@ def parse_contents(contents, filename, date):
                         'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
                                       'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
                 ),
-            ], width=2),
+            ], width=3),
             dbc.Col([
                 dbc.Card([
                     dbc.CardHeader('Interview Flow', style={'font-weight': 'bold', 'text-align': 'left'}),

@@ -1,10 +1,14 @@
-import base64
-import datetime
-import io
 
-
+import dash
+from dash import html
 import dash_bootstrap_components as dbc
-from dash import Input, Output, dcc, html
+
+app = dash.Dash(__name__,
+                suppress_callback_exceptions=True,
+                external_stylesheets=[
+                    dbc.themes.CERULEAN,
+                    dbc.icons.FONT_AWESOME
+                ],)
 
 dom_dict_text = {'People': ['Need for additional FTE resources for software accounting.',
   'Need for training to increase talent capability.',
@@ -23,8 +27,6 @@ dom_dict_text = {'People': ['Need for additional FTE resources for software acco
 def create_dom_cards(dom_text=dom_dict_text):
 
     if dom_text:
-        #check if all domains have outputs
-        # set(dom_dict_text.keys())
 
         card_names_img_dict = {
             'Culture and Leadership':'assets/Culture and Leadership.png',
@@ -45,36 +47,50 @@ def create_dom_cards(dom_text=dom_dict_text):
                             dbc.CardBody(
                                 [
                                     html.H5(key, className="card-title"),
-                                    html.P(dom_text[key], className="card-text", ),
+                                    dbc.Row([html.P('• '+x, className="card-text", ) for x in dom_text[key]]),
                                 ]
                             )
                         ),
                         dbc.Card(
                             dbc.CardImg(src=card_names_img_dict[key],
-                                        className = 'align-self-center img-fluid'),
+                                        className = 'align-self-center img-fluid',
+
+                                        style={'height':'70px',
+                                               'width':'70px',
+                                               'margin-top':'80px'
+                                               }
+                                        ),
                             className="bg-primary",
                             style={"maxWidth": 100},
                         ),
                         ],
+                        style={'height':'100%'},
                     className="mt-3 shadow",
-                ), width=3)
+                ), width =4,
+                align ='center',
+                style={'height':'220px'}
+                    )
 
             )
 
         domain_row = [
             dbc.Row(domain_cards[0:3],
                         align='center',
-                        justify='start',
-                        class_name='g-1'),
+                    justify='around',
+                    style={'margin-top': '10px'}
+
+                    ),
             dbc.Row(domain_cards[3:6],
                     align='center',
-                    justify='start',
-                    class_name='g-1'
-                    ),
+                    justify='around',
+                    style = {'margin-top': '10px'}
+
+        ),
             dbc.Row(domain_cards[6],
                     align='center',
-                    justify='start',
-                    class_name='g-1'
+                    justify='around',
+                    style = {'margin-top':'10px'}
+
                     )
         ]
 
@@ -84,24 +100,8 @@ def create_dom_cards(dom_text=dom_dict_text):
         pass
 
 
-import dash
-from dash.dependencies import Input, Output, State
-from dash import dcc, html, dash_table
-
-import pandas as pd
-
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-
-
-
-
-
 
 app.layout = html.Div(create_dom_cards(dom_dict_text))
-print(html.Div(create_dom_cards(dom_dict_text)))
 
 
 if __name__ == '__main__':
