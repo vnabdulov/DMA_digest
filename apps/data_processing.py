@@ -8,6 +8,7 @@ from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 
 
+
 def sub_terms(interview_string):
     interview_string = interview_string.replace('Umm,','').replace('you know','').replace('Yeah.','').replace('Umm','').replace('Yeah,','').replace('Uh,',' ').replace('uh','').replace('Uh.','')
     interview_string = interview_string.replace('So yeah','').replace('Mm-hmm','').replace('OK','').replace('soften', 'SOFM').replace('Advanta','Advana').replace('Absolute you sock', 'USASOC').replace('you sock','USASOC')
@@ -138,7 +139,10 @@ def generate_issues(chunks):
     return ''.join(issues)
 
 
-
+# def generate_cards(domain_prompts):
+#     domains =
+#     domain_images =
+#     domain_prompt =
 
 
 # def get_top_ten_ents(df):
@@ -224,84 +228,203 @@ def parse_contents(contents, filename, date):
     for x in range(len(speakers)):
         speaker_colors[speakers[x]] = colors[x]
 
+    speaker_durations = speaker_durations[speaker_durations['duration']>0]
+    speaker_durations.reset_index(drop=True, inplace=True)
+    # print(speaker_durations['duration'].tolist())
+
     # Plot the bar graph
     fig_speaker_durations = px.bar(speaker_durations,
                                    x='duration',
                                    y='speaker',
                                    color='speaker',
-                                   color_discrete_map=speaker_colors)
+                                   color_discrete_map=speaker_colors,
+                                   text = 'speaker',
+                                   )
 
     # Remove the background
     fig_speaker_durations.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',  # transparent
         plot_bgcolor='rgba(0,0,0,0)',
-        legend=dict(title="Speaker"),
         xaxis_title=None,
-        yaxis_title=None
-
+        yaxis_title=None,
+        margin = dict(t=3, b=3, l=3, r=3),
+        legend=dict(
+                title="Speaker",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
     )
     fig_speaker_durations.update_xaxes(showticklabels=False)
+    fig_speaker_durations.update_yaxes(showticklabels=False)
 
     fig_prompt_duration = px.bar(prompt_duration_df.reset_index(),
                                  x='index',
                                  y='duration',
                                  color='speaker',
+
                  color_discrete_map=speaker_colors)
     # Remove the background
     fig_prompt_duration.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',  # transparent
         plot_bgcolor='rgba(0,0,0,0)',
-        legend=dict(title="Speaker"),
+        showlegend=True,
         xaxis_title=None,
-        yaxis_title=None
+        yaxis_title=None,
+        margin = dict(t=3, b=3, l=3, r=3),
+        legend=dict(
+            title="Speaker",
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
     )
     fig_prompt_duration.update_xaxes(showticklabels=False)
     fig_prompt_duration.update_yaxes(showticklabels=False)
+    fig_prompt_duration.update_traces(width=0.5)
+
+  #######################subplots variation######################################################
+    # from plotly.subplots import make_subplots
+    # # For as many traces that exist per Express figure, get the traces from each plot and store them in an array.
+    # # This is essentially breaking down the Express fig into it's traces
+    # prompt_duration_traces = []
+    # speaker_durations_traces = []
+    # for trace in range(len(fig_speaker_durations["data"])):
+    #     speaker_durations_traces.append(fig_speaker_durations["data"][trace])
+    # for trace in range(len(fig_prompt_duration["data"])):
+    #     prompt_duration_traces.append(fig_prompt_duration["data"][trace])
+    #
+    # # Create a 1x2 subplot
+    # fig_bothplots = make_subplots(rows=1,
+    #                               cols=2,
+    #                               column_widths=[0.3, 0.7],
+    #                               horizontal_spacing=0.01,
+    #                               subplot_titles=('Speaker Participation', 'Interview Flow')
+    #                               )
+    #
+    # # Get the Express fig broken down as traces and add the traces to the proper plot within in the subplot
+    # for traces in speaker_durations_traces:
+    #     fig_bothplots.append_trace(traces, row=1, col=1)
+    # for traces in prompt_duration_traces:
+    #     fig_bothplots.append_trace(traces, row=1, col=2)
+    #
+    #
+    # fig_bothplots.update_layout(
+    #     paper_bgcolor='rgba(0,0,0,0)',  # transparent
+    #     plot_bgcolor='rgba(0,0,0,0)',
+    #     xaxis_title=None,
+    #     yaxis_title=None,
+    #     margin=dict(t=10, b=10, l=3, r=3),
+    #     legend=dict(
+    #             title="Speaker",
+    #             # font=dict(size=15),
+    #             orientation="h",
+    #             yanchor="bottom",
+    #             y=1.02,
+    #             xanchor="right",
+    #             x=1
+    #         )
+    # )
+    # fig_bothplots.update_xaxes(showticklabels=False)
+    # fig_bothplots.update_yaxes(showticklabels=False)
+##########################################################
 
 
+
+
+
+
+
+###############################################################
     return html.Div([
+
         html.H6(f'Filename: {filename}'),
         html.H6(datetime.datetime.fromtimestamp(date)),
-        dbc.Card([
-            dbc.CardHeader('Interview Participation', style={'font-weight':'bold','text-align':'left'}),
-            dcc.Graph(figure=fig_speaker_durations),
+        # dbc.Row([
+        #     dcc.Graph(figure=fig_bothplots),
+        # ], style={
+        #           'margin-top': '10px',
+        #             'border-radius':'10px',
+        #           'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
+        #                         'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}),
 
-        ],className="text-center",
+    # the subplot as shown in the above image
+    # fig_bothplots.update_layout(legend=dict(
+    #     title="Speaker",
+    #     orientation="h",
+    #     yanchor="bottom",
+    #     y=1.02,
+    #     xanchor="right",
+    #     x=1
+    # ))
+        dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader('Interview Participation', style={'font-weight': 'bold', 'text-align': 'left'}),
+                    dcc.Graph(figure=fig_speaker_durations),
+
+                ], className="text-center",
+                    style={
+                        'margin-top': '10px',
+                        'border-radius': '10px',
+                        'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
+                                      'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
+                ),
+            ], width=2),
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader('Interview Flow', style={'font-weight': 'bold', 'text-align': 'left'}),
+                    dcc.Graph(figure=fig_prompt_duration),
+
+                ], className="text-center",
+                    style={
+                        'margin-top': '10px',
+                        'border-radius': '10px',
+                        'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
+                                      'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
+
+                ),
+            ])
+
+
+        ],
+            style={
+                  'margin-top': '10px'
+            }
+                    ),
+
+        dbc.Row([
+            dbc.Card([
+                dash_table.DataTable(
+                    c_df.to_dict('records'),
+                    [{'name': i, 'id': i} for i in df.columns],
+                    style_cell_conditional=[
+                        {
+                            'if': {'column_id': 'text'},
+                            'textAlign': 'left'
+                        }],
+                    style_data={
+                        'whiteSpace': 'normal',
+                        'height': 'auto'
+                    },
+
+                ), ],
+                style={
+                    'margin-top': '10px',
+                    'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
+                                  'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
+            ),
+        ],
             style={
                 'margin-top': '10px',
+                'border-radius': '10px',
                 'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
                               'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
         ),
-        dbc.Card([
-            dbc.CardHeader('Interview Flow', style={'font-weight':'bold','text-align':'left'}),
-            dcc.Graph(figure=fig_prompt_duration),
 
-        ],className="text-center",
-        style={
-            'margin-top':'10px',
-            'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
-                         'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
-        ),
-        dbc.Card([
-        dash_table.DataTable(
-            c_df.to_dict('records'),
-            [{'name': i, 'id': i} for i in df.columns],
-            style_cell_conditional=[
-                {
-                    'if': {'column_id': 'text'},
-                    'textAlign': 'left'
-                }],
-            style_data = {
-                'whiteSpace':'normal',
-                'height':'auto'
-            },
-
-        ),],
-            style={
-            'margin-top':'10px',
-            'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
-                         'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
-        ),
 
         html.Hr(),  # horizontal line
 

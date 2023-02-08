@@ -9,8 +9,11 @@ card_complete = dbc.Card(
         ], className="border-start border-primary border-5",
     ),
     className="text-center",
-    style={'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
-                         'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
+    style={
+        'border-radius':'10px',
+        'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
+                         'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px',
+    }
 
 )
 
@@ -24,8 +27,11 @@ card_current = dbc.Card(
 
     ),
     className="text-center",
-    style={'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
-                         'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
+    style={
+        'border-radius':'10px',
+        'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
+                         'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px',
+    }
 )
 
 card_score = dbc.Card(
@@ -36,8 +42,11 @@ card_score = dbc.Card(
         ], className="border-start border-primary border-5"
     ),
     className="text-center",
-    style={'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
-                         'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
+    style={
+        'border-radius':'10px',
+        'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
+                         'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px',
+    }
 )
 
 layout = dbc.Container(
