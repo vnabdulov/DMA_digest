@@ -6,7 +6,7 @@ import io
 
 from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
-
+from domain_cards import create_dom_cards
 
 
 def sub_terms(interview_string):
@@ -340,8 +340,12 @@ def parse_contents(contents, filename, date):
 
 ###############################################################
     return html.Div([
-
-        html.H6(f'Filename: {filename}'),
+        html.Div(create_dom_cards(),
+                 style={
+                     'margin-top':'10px',
+                     'display': 'inline-block'
+                 },  ),
+        html.H6(f'Filename: {filename}',  style={'margin-top':'20px'}),
         html.H6(datetime.datetime.fromtimestamp(date)),
         # dbc.Row([
         #     dcc.Graph(figure=fig_bothplots),

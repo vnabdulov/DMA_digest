@@ -20,7 +20,7 @@ dom_dict_text = {'People': ['Need for additional FTE resources for software acco
  'Culture and Leadership': ['Issues with project funding, business case development, planning, communication, and involving customers and partners in setting direction.'],
  'Strategy and Approach': ['Lack of vision for consolidation and improvement of data quality and accessibility.']}
 
-def create_dom_cards(dom_text):
+def create_dom_cards(dom_text=dom_dict_text):
 
     if dom_text:
         #check if all domains have outputs
@@ -50,20 +50,32 @@ def create_dom_cards(dom_text):
                             )
                         ),
                         dbc.Card(
-                            dbc.CardImg(src=card_names_img_dict[key]),
+                            dbc.CardImg(src=card_names_img_dict[key],
+                                        className = 'align-self-center img-fluid'),
                             className="bg-primary",
-                            style={"maxWidth": 75},
+                            style={"maxWidth": 100},
                         ),
                         ],
-                    className="mt-4 shadow",
+                    className="mt-3 shadow",
                 ), width=3)
 
             )
 
         domain_row = [
-            dbc.Row(domain_cards[0:3]),
-            dbc.Row(domain_cards[3:6]),
-            dbc.Row(domain_cards[6])
+            dbc.Row(domain_cards[0:3],
+                        align='center',
+                        justify='start',
+                        class_name='g-1'),
+            dbc.Row(domain_cards[3:6],
+                    align='center',
+                    justify='start',
+                    class_name='g-1'
+                    ),
+            dbc.Row(domain_cards[6],
+                    align='center',
+                    justify='start',
+                    class_name='g-1'
+                    )
         ]
 
         return domain_row
