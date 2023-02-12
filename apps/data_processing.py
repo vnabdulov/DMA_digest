@@ -367,7 +367,11 @@ def parse_contents(contents, filename, date):
         dbc.Row([
             dbc.Col([
                 dbc.Card([
-                    dbc.CardHeader('Interview Participation', style={'font-weight': 'bold', 'text-align': 'left'}),
+                    dbc.CardHeader('Interview Participation',
+                                   style={
+
+                                       'font-weight': 'bold', 'text-align': 'left'}
+                                   ),
                     dcc.Graph(figure=fig_speaker_durations),
 
                 ], className="text-center",

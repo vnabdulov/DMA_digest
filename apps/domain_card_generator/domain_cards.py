@@ -44,6 +44,19 @@ def create_dom_cards(dom_text=dom_dict_text):
                     dbc.CardGroup(
                         [
                         dbc.Card(
+                            dbc.CardImg(src=card_names_img_dict[key],
+                                        className='position-absolute top-50 start-50 translate-middle',
+
+                                        style={'height': '70px',
+                                               'width': '70px',
+                                               # 'margin-top':'80px'
+                                               }
+                                        ),
+                            className="bg-primary",
+                            style={"maxWidth": 100},
+                        ),
+
+                        dbc.Card(
                             dbc.CardBody(
                                 [
                                     html.H5(key, className="card-title"),
@@ -51,18 +64,7 @@ def create_dom_cards(dom_text=dom_dict_text):
                                 ]
                             )
                         ),
-                        dbc.Card(
-                            dbc.CardImg(src=card_names_img_dict[key],
-                                        className = 'align-self-center img-fluid',
 
-                                        style={'height':'70px',
-                                               'width':'70px',
-                                               'margin-top':'80px'
-                                               }
-                                        ),
-                            className="bg-primary",
-                            style={"maxWidth": 100},
-                        ),
                         ],
                         style={'height':'100%'},
                     className="mt-3 shadow",
