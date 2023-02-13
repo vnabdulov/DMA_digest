@@ -1,12 +1,15 @@
 import base64
 import datetime
 import io
+import os
+
 # import spacy
 # import en_core_web_lg
 
 from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 from domain_cards import create_dom_cards
+import dash_ag_grid as dag
 
 
 def sub_terms(interview_string):
@@ -340,13 +343,61 @@ def parse_contents(contents, filename, date):
 
 ###############################################################
     return html.Div([
-        dbc.Row(create_dom_cards(),
-                 style={
-                     'margin-top':'10px',
+        dbc.Tabs([
+            dbc.Tab([
+                dbc.Row([
+                    dbc.Col([
+                        dbc.Card([
+                            dbc.CardHeader('Interview Participation',
+                                           style={
 
-                 }),
-        dbc.Row([html.H6(f'Filename: {filename}')],  style={'margin-top':'30px'}),
-        html.H6(datetime.datetime.fromtimestamp(date)),
+                                               'font-weight': 'bold', 'text-align': 'left'}
+                                           ),
+                            dcc.Graph(figure=fig_speaker_durations),
+
+                        ], className="text-center",
+                            style={
+                                'margin-top': '10px',
+                                'border-radius': '10px',
+                                'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
+                                              'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
+                        ),
+                    ], width=3),
+                    dbc.Col([
+                        dbc.Card([
+                            dbc.CardHeader('Interview Flow', style={'font-weight': 'bold', 'text-align': 'left'}),
+                            dcc.Graph(figure=fig_prompt_duration),
+
+                        ], className="text-center",
+                            style={
+                                'margin-top': '10px',
+                                'border-radius': '10px',
+                                'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
+                                              'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
+
+                        ),
+                    ], width=9)
+
+                ],
+                    style={
+                        'margin-top': '10px'
+                    }
+                ),
+
+            ], label='Interview Overview'),
+            dbc.Tab([
+                dbc.Row(create_dom_cards(),
+                        style={
+                            'margin-top': '10px',
+
+                        }),
+            ], label='Domain Insights',
+            # activeLabelClassName="text-info",
+            # active_tab_style={"textTransform": "full-width"},
+            )
+        ]),
+
+
         # dbc.Row([
         #     dcc.Graph(figure=fig_bothplots),
         # ], style={
@@ -364,62 +415,81 @@ def parse_contents(contents, filename, date):
     #     xanchor="right",
     #     x=1
     # ))
-        dbc.Row([
-            dbc.Col([
-                dbc.Card([
-                    dbc.CardHeader('Interview Participation',
-                                   style={
-
-                                       'font-weight': 'bold', 'text-align': 'left'}
-                                   ),
-                    dcc.Graph(figure=fig_speaker_durations),
-
-                ], className="text-center",
-                    style={
-                        'margin-top': '10px',
-                        'border-radius': '10px',
-                        'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
-                                      'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
-                ),
-            ], width=3),
-            dbc.Col([
-                dbc.Card([
-                    dbc.CardHeader('Interview Flow', style={'font-weight': 'bold', 'text-align': 'left'}),
-                    dcc.Graph(figure=fig_prompt_duration),
-
-                ], className="text-center",
-                    style={
-                        'margin-top': '10px',
-                        'border-radius': '10px',
-                        'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
-                                      'rgba(0, 0, 0, 0.3) 0px 3px 7px -3px'}
-
-                ),
-            ])
-
-
-        ],
-            style={
-                  'margin-top': '10px'
-            }
-                    ),
-
+        dbc.Row([html.H6(f'Filename: {filename}')], style={'margin-top': '30px'}),
+        html.H6(datetime.datetime.fromtimestamp(date)),
         dbc.Row([
             dbc.Card([
-                dash_table.DataTable(
-                    c_df.to_dict('records'),
-                    [{'name': i, 'id': i} for i in df.columns],
-                    style_cell_conditional=[
-                        {
-                            'if': {'column_id': 'text'},
-                            'textAlign': 'left'
-                        }],
-                    style_data={
-                        'whiteSpace': 'normal',
-                        'height': 'auto'
-                    },
+                dbc.Row(
+                    [
+                        dag.AgGrid(
 
-                ), ],
+                            enableEnterpriseModules=True,
+
+                            columnDefs=[
+                                {
+                                    "headerName": "Speaker's Name",
+                                    "field": "speaker",
+                                },
+                                {
+                                    "headerName": "Text",
+                                    "field": "text",
+                                },
+                                {
+                                    "headerName": "Start Time",
+                                    "field": "start_time",
+                                    # "type": "rightAligned",
+                                    "filter": "agNumberColumnFilter",
+                                },
+                                {
+                                    "headerName": "End Time",
+                                    "field": "end_time",
+                                    # "type": "rightAligned",
+                                    "filter": "agNumberColumnFilter",
+                                    "valueFormatter": "Number(value).toFixed(2)",
+                                    "cellRenderer": "agAnimateShowChangeCellRenderer",
+                                },
+                                # {
+                                #     "headerName": "Total Prompt Time",
+                                #     "type": "rightAligned",
+                                #     "filter": "agNumberColumnFilter",
+                                #     "valueGetter": "Number(data.price) * Number(data.quantity)",
+                                #     "valueFormatter": "Number(value).toFixed(2)",
+                                #     "cellRenderer": "agAnimateShowChangeCellRenderer",
+                                # },
+                            ],
+                            rowData=c_df.to_dict('records'),
+                            columnSize="sizeToFit",
+                            defaultColDef={
+                                "filter": "agNumberColumnFilter",
+                                "resizable": True,
+                                "sortable": True,
+                                "editable": False,
+                                'searchable':True,
+                                "floatingFilter": True,
+                            }
+                        ),
+                    ]
+                )
+
+
+
+
+
+                # dash_table.DataTable(
+                #     c_df.to_dict('records'),
+                #     [{'name': i, 'id': i} for i in df.columns],
+                #     style_cell_conditional=[
+                #         {
+                #             'if': {'column_id': 'text'},
+                #             'textAlign': 'left'
+                #         }],
+                #     style_data={
+                #         'whiteSpace': 'normal',
+                #         'height': 'auto'
+                #     },
+                #
+                # ),
+            ],
                 style={
                     'margin-top': '10px',
                     'box-shadow': 'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, '
